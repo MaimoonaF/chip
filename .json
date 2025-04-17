@@ -1,0 +1,4300 @@
+openapi: 3.0.0
+info:
+  title: Chiphub Private API
+  version: 1.0.10
+  description: API for communicating with Chiphub
+servers:
+  - url: https://api.chiphub.com:443
+    description: Production server
+  - url: https://demo.api.chiphub.com:443
+    description: Demo server
+  - url: http://localhost:8080
+    description: Dev localhost
+paths:
+  /api/auth/totp:
+    post:
+      tags:
+        - auth
+      summary: Generate a TOTP code for an email address
+      security:
+        - ServerKeyAuth: []
+      description: Generates and sends a TOTP code to the specified email address.
+      requestBody:
+        description: Email address to send the TOTP code to.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserTOTPReq"
+      responses:
+        "200":
+          description: Email Sent
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/auth/invite:
+    post:
+      tags:
+        - auth
+      summary: Invite a user
+      security:
+        - JWT: []
+      description: Allows an admin to invite a user to the platform.
+      requestBody:
+        description: User invitation details.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInviteReq"
+      responses:
+        "200":
+          description: User invited
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+  /api/orgs:
+    get:
+      tags:
+        - orgs
+      summary: List organizations
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Retrieves a list of organizations.
+      responses:
+        "200":
+          description: List of organizations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ComputedOrgResp"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+    post:
+      tags:
+        - orgs
+      summary: Create an organization
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Allows a super admin to create a new organization.
+      requestBody:
+        description: Organization creation details.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrgCreationReq"
+      responses:
+        "200":
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgCreationResp"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+  /api/orgs/{orgID}/features:
+    post:
+      tags:
+        - orgs
+      summary: Set organization features
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Allows a super admin to set features for an organization.
+      parameters:
+        - name: orgID
+          in: path
+          required: true
+          description: The ID of the organization.
+          schema:
+            type: string
+      requestBody:
+        description: Features to set for the organization.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeatureSet"
+      responses:
+        "200":
+          description: Features set
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+    get:
+      tags:
+        - orgs
+      summary: Get organization features
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Retrieves the features set for an organization.
+      parameters:
+        - name: orgID
+          in: path
+          required: true
+          description: The ID of the organization.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Organization features
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureSet"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+  /api/orgs/byid/{orgID}:
+    get:
+      tags:
+        - orgs
+      summary: Get organization by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Retrieves details of an organization by its ID.
+      parameters:
+        - name: orgID
+          in: path
+          required: true
+          description: The ID of the organization.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Organization details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComputedOrgResp"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+    patch:
+      tags:
+        - orgs
+      summary: Update organization by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Updates details of an organization by its ID.
+      parameters:
+        - name: orgID
+          in: path
+          required: true
+          description: The ID of the organization.
+          schema:
+            type: string
+      requestBody:
+        description: Organization update details.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComputedOrgResp"
+      responses:
+        "200":
+          description: Organization updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgCreationResp"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+    delete:
+      tags:
+        - orgs
+      summary: Delete organization by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Deletes an organization by its ID.
+      parameters:
+        - name: orgID
+          in: path
+          required: true
+          description: The ID of the organization.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Organization deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgCreationResp"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+  /api/auth/reset:
+    post:
+      tags:
+        - auth
+      summary: Reset user password
+      description: Allows a user to reset their password.
+      requestBody:
+        description: Password reset request details.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAuthReq"
+      responses:
+        "200":
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAuthResetResp"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+  /api/auth/signup:
+    post:
+      tags:
+        - auth
+      summary: Sign up a new user
+      description: Allows a user to create a new account.
+      requestBody:
+        description: User sign-up details.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAuthReq"
+      responses:
+        "200":
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAuthResp"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+  /api/auth/head:
+    head:
+      tags:
+        - auth
+      summary: Check authentication status
+      security:
+        - JWT: []
+      description: Checks if the user is authenticated.
+      responses:
+        "200":
+          description: Authenticated
+        "401":
+          description: Relogin required
+  /api/auth/login:
+    post:
+      tags:
+        - auth
+      summary: Log in a user
+      security:
+        - ServerKeyAuth: []
+      description: Validates user credentials and generates a JWT.
+      requestBody:
+        description: User login details.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAuthReq"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAuthResp"
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+  /api/chat/conversations/new:
+    post:
+      tags:
+        - chat
+      summary: Start a new conversation with a PDF
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Uploads a PDF file to start a new bot conversation.
+      requestBody:
+        description: PDF file to upload.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                pdfFile:
+                  type: string
+                  format: binary
+                  description: The PDF file to upload.
+      responses:
+        "200":
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: File uploaded successfully
+        "400":
+          description: Invalid input
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "401":
+          description: Unauthorized
+  /api/chat/conversations/{userID}:
+    get:
+      tags:
+        - chat
+      summary: List user conversations
+      description: Fetches a list of conversations for a given user.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: User not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+  /api/chat/conversations/{conversationID}/messages:
+    get:
+      tags:
+        - chat
+      summary: Fetch conversation messages
+      description: Fetches messages for a specific conversation.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: conversationID
+          in: path
+          required: true
+          description: The ID of the conversation.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Conversation not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MessageResp"
+  /api/docs/byconversation/{convID}:
+    get:
+      tags:
+        - docs
+      summary: Get documents by conversation ID
+      description: Retrieves documents associated with a specific conversation.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: convID
+          in: path
+          required: true
+          description: The ID of the conversation.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Conversation not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PresignedPayload"
+  /api/docs/getViewURL/{pdfID}:
+    get:
+      tags:
+        - docs
+      summary: Get document view URL
+      description: Retrieves a presigned URL to view a document.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: pdfID
+          in: path
+          required: true
+          description: The ID of the document.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Document not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Presigned URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresignedPayload"
+  /api/docs/byid/{docid}:
+    get:
+      tags:
+        - docs
+      summary: Get document by ID
+      description: Retrieves a document by its ID.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: docid
+          in: path
+          required: true
+          description: The ID of the document.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Document not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Document details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+    delete:
+      tags:
+        - docs
+      summary: Delete document by ID
+      description: Deletes a document by its ID.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: docid
+          in: path
+          required: true
+          description: The ID of the document.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Document not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Document deleted successfully.
+
+  /api/docs/user:
+    get:
+      tags:
+        - docs
+      summary: Get user documents
+      description: Retrieves documents associated with the authenticated user.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Documents not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of user documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PDF"
+  /api/docs/org:
+    get:
+      tags:
+        - docs
+      summary: Get organization documents
+      description: Retrieves documents associated with the authenticated user's organization.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Documents not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of organization documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PDF"
+  /api/docs/getpublicuserdocs/{userid}:
+    get:
+      tags:
+        - docs
+      summary: Get public documents by user ID
+      description: Retrieves public documents associated with a specific user by their ID.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: userid
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Documents not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of public documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PDF"
+  /api/docs/getUploadURL:
+    get:
+      tags:
+        - docs
+      summary: Get presigned URL for document upload
+      description: Retrieves a presigned URL for uploading a document.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: URL not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Presigned URL for upload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresignedPayload"
+
+  /api/docs/finalize:
+    post:
+      tags:
+        - docs
+      summary: Finalize document upload
+      description: Notifies the server that the document upload is complete.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFProcessItem"
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Document not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Document upload finalized successfully
+  /api/docs/status:
+    post:
+      tags:
+        - docs
+      summary: Check document processing status
+      description: Checks the processing status of documents.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFIDs"
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Documents not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Document processing status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PDFIDs"
+  /api/docs/rename:
+    post:
+      tags:
+        - docs
+      summary: Rename a document
+      description: Renames a document.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFProcessItem"
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Document not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Document renamed successfully
+  /api/chat/message:
+    post:
+      tags:
+        - chat
+      summary: Send a message
+      description: Sends a new message in a conversation.
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      requestBody:
+        description: Message to be sent
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Message"
+      responses:
+        "200":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResp"
+        "401":
+          description: Unauthorized
+        "402":
+          description: Out of questions
+        "404":
+          description: Conversation not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+
+  /api/users/byusername/{username}:
+    get:
+      tags:
+        - users
+      summary: Get user by username
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: Fetches a user by username
+      parameters:
+        - name: username
+          in: path
+          required: true
+          description: The username of the user.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: User not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: A User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /api/users/byemail/{email}:
+    get:
+      tags:
+        - users
+      summary: Get user by email
+      security:
+        - ServerKeyAuth: []
+      description: Fetches a user by their email address. Requires server authentication.
+      parameters:
+        - name: email
+          in: path
+          required: true
+          description: The email address of the user.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: User not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /api/users/byid/{userID}:
+    get:
+      tags:
+        - users
+      summary: Get user by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: Fetches a user by their ID.
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: User not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      tags:
+        - users
+      summary: Delete user by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: Deletes a user by their ID. Admins cannot be deleted.
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "412":
+          description: Admin deletion not allowed
+        "404":
+          description: User not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: User deleted successfully
+  /api/admin/reindex:
+    post:
+      tags:
+        - admin
+      summary: Reindex the database
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Allows a super admin to rerun the database index.
+      responses:
+        "200":
+          description: Index rerun successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/admin/resetQuota/byID/{orgID}:
+    post:
+      tags:
+        - admin
+      summary: Reset organization quota
+      parameters:
+        - name: orgID
+          in: path
+          required: true
+          description: The ID of the organization.
+          schema:
+            type: string
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Allows a super admin to reset the quota for an organization.
+      responses:
+        "200":
+          description: Quota reset successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/categories:
+    post:
+      tags:
+        - admin
+        - categories
+      summary: Add a new category
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Allows a super admin to add a new category.
+      requestBody:
+        description: Categories to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Category"
+      responses:
+        "200":
+          description: Category added successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+    get:
+      tags:
+        - admin
+        - categories
+      summary: Retrieve available categories
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Retrieves a list of available categories.
+      responses:
+        "200":
+          description: Category list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/users:
+    get:
+      tags:
+        - users
+      summary: List users
+      security:
+        - ServerKeyAuth: []
+        - JWT: []
+      description: Lists all users. Must be called by the backend server.
+      responses:
+        "200":
+          description: Users listed successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+    post:
+      tags:
+        - users
+      summary: Create a new user
+      security:
+        - ServerKeyAuth: []
+      description: Creates a new user. Must be called by the backend server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request, e.g., duplicate email
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/groups:
+    get:
+      tags:
+        - groups
+      summary: List groups
+      security:
+        - ServerKeyAuth: []
+      description: Lists all groups.
+      responses:
+        "200":
+          description: Groups listed successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Group"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+    post:
+      tags:
+        - groups
+      summary: Create a new group
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Creates a new group.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Group"
+      responses:
+        "200":
+          description: Group created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request, e.g., duplicate email
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/groups/byid/{groupID}:
+    get:
+      tags:
+        - groups
+      summary: Get group by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Fetches a group by its ID.
+      parameters:
+        - name: groupID
+          in: path
+          required: true
+          description: The ID of the group.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Group not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Group details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+    patch:
+      tags:
+        - groups
+      summary: Update group by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Updates a group by its ID. Must authenticate as server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Group"
+      parameters:
+        - name: groupID
+          in: path
+          required: true
+          description: The ID of the group.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Group not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Group updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+    delete:
+      tags:
+        - groups
+      summary: Delete group by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Deletes a group by its ID.
+      parameters:
+        - name: groupID
+          in: path
+          required: true
+          description: The ID of the group.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group deleted successfully
+        "401":
+          description: Unauthorized
+        "404":
+          description: Group not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/usergroups:
+    get:
+      tags:
+        - usergroups
+      summary: List UserGroups
+      security:
+        - ServerKeyAuth: []
+      description: Lists all usergroups.
+      responses:
+        "200":
+          description: UserGroup created successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserGroup"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+    post:
+      tags:
+        - usergroups
+      summary: Create UserGroup
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Creates a new usergroup.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserGroup"
+      responses:
+        "200":
+          description: UserGroup created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGroup"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request, i.e. duplicate email
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/usergroups/byid/{usergroupID}:
+    get:
+      tags:
+        - usergroups
+      summary: Get usergroup by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: Fetches a usergroup by ID, must auth as server
+      parameters:
+        - name: usergroupID
+          in: path
+          required: true
+          description: The ID of the usergroup.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: UserGroup not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: A UserGroup
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGroup"
+    patch:
+      tags:
+        - usergroups
+      summary: Update usergroup by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: Update a usergroup by ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserGroup"
+      parameters:
+        - name: usergroupID
+          in: path
+          required: true
+          description: The ID of the usergroup.
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: UserGroup not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: A UserGroup
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGroup"
+    delete:
+      tags:
+        - usergroups
+      summary: Delete usergroup by ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: Delete a usergroup by ID
+      parameters:
+        - name: usergroupID
+          in: path
+          required: true
+          description: The ID of the usergroup.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: UserGroup successfully deleted
+        "401":
+          description: Unauthorized
+        "404":
+          description: UserGroup not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/chat/conversations/{conversationID}:
+    delete:
+      tags:
+        - chat
+      summary: Delete Conversation
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: Deletes a conversation and its related data.
+      parameters:
+        - name: conversationID
+          in: path
+          required: true
+          description: The ID of the conversation to delete.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Conversation deleted successfully.
+        "401":
+          description: Unauthorized
+        "404":
+          description: Conversation not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/user:
+    patch:
+      tags:
+        - users
+      summary: Update your own user profile.
+      security:
+        - JWT: []
+      description: Update your own user profile.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: User created successfully.
+
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request, i.e. duplicate email
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+    get:
+      tags:
+        - users
+      summary: Get My User
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: gets apikey and other params back
+      responses:
+        "200":
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+    post:
+      tags:
+        - users
+      summary: Create a new user
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - ServerKeyAuth: []
+      description: Creates a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserWithPassword"
+      responses:
+        "200":
+          description: User created successfully
+        "401":
+          description: Unauthorized
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/conversations/{convid}/reports/create:
+    post:
+      tags:
+        - reports
+      security:
+        - JWT: []
+      parameters:
+        - name: convid
+          in: path
+          required: true
+          description: the conversation to create the report for
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DateRange"
+      responses:
+        "200":
+          description: Report generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+  /api/trees/byid/{treeID}/tree:
+    get:
+      tags:
+        - trees
+      summary: Get tree a given treeID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: treeID
+          in: path
+          required: true
+          description: the conversation to create the report for
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Tree not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of report IDs together with their types
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tree"
+  /api/trees/new:
+    post:
+      tags:
+        - trees
+      summary: Create a new tree
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Tree"
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Tree not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Tree created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tree"
+  /api/trees/byid/{treeID}/decisions:
+    get:
+      tags:
+        - trees
+      summary: Get decisions for a tree
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: treeID
+          in: path
+          required: true
+          description: The ID of the tree
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Tree not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of decisions for the tree
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TreeDecisionList"
+    post:
+      tags:
+        - trees
+      summary: Create a decision for a tree
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: treeID
+          in: path
+          required: true
+          description: The ID of the tree
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TreeDecision"
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Tree not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Decision created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TreeDecisionList"
+  /api/trees/byid/{treeID}/decisions/{decisionID}:
+    patch:
+      tags:
+        - trees
+      summary: Update a decision in a tree
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: decisionID
+          in: path
+          required: true
+          description: The ID of the decision
+          schema:
+            type: string
+        - name: treeID
+          in: path
+          required: true
+          description: The ID of the tree
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TreeDecision"
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Tree not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Decision updated successfully
+    delete:
+      tags:
+        - trees
+      summary: Delete a decision from a tree
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: decisionID
+          in: path
+          required: true
+          description: The ID of the decision
+          schema:
+            type: string
+        - name: treeID
+          in: path
+          required: true
+          description: The ID of the tree
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Tree not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Decision deleted successfully
+  /api/trees/mine/list:
+    get:
+      tags:
+        - trees
+      summary: Get list of trees owned by user
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Trees not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of trees owned by user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TreeList"
+  /api/reports/list:
+    get:
+      tags:
+        - reports
+      summary: Get list of reports owned by user
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Reports not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of reports owned by user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportList"
+  /api/reports/table/answers/byID/{reportID}:
+    get:
+      tags:
+        - reports
+      summary: Get table answers for a report
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: reportID
+          in: path
+          required: true
+          description: The ID of the report
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Report not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of table answers for the report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnswerList"
+  /api/reports/table/byID/{reportID}:
+    get:
+      tags:
+        - reports
+      summary: Get table info by report ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: reportID
+          in: path
+          required: true
+          description: The ID of the report
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Report not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Table data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TableData"
+  /api/reports/chat/byID/{reportID}:
+    get:
+      tags:
+        - reports
+      summary: Get presigned URL for a report
+      description: Get presigned URL to view a report
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: reportID
+          in: path
+          required: true
+          description: The ID of the report
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Report not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Presigned URL retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresignedPayload"
+  /api/reports/tables/user:
+    get:
+      tags:
+        - reports
+      summary: Get table reports for a user
+      description: Get table reports for a user
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      responses:
+        "401":
+          description: Unauthorized
+        "404":
+          description: Reports not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: List of table reports for the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+  /api/reports/create/fromdocs:
+    post:
+      tags:
+        - reports
+      summary: Create a report from documents
+      security:
+        - JWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TableReport"
+      responses:
+        "200":
+          description: Report created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewReport"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/reports/byid/{reportID}/addQuestion:
+    patch:
+      tags:
+        - reports
+      summary: Add a question to a report
+      security:
+        - JWT: []
+      parameters:
+        - name: reportID
+          in: path
+          required: true
+          description: The ID of the report
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+      responses:
+        "200":
+          description: Question added successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/conversations/byorg/{orgid}:
+    get:
+      tags:
+        - conversations
+      summary: Get conversations for an organization
+      security:
+        - JWT: []
+      description: Get conversations for an organization
+      parameters:
+        - name: orgid
+          in: path
+          required: true
+          description: The ID of the organization
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of conversations for the organization
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/conversations/byuser/{userid}:
+    get:
+      tags:
+        - conversations
+      summary: Get conversations for a user
+      security:
+        - JWT: []
+      description: Get conversations for a user
+      parameters:
+        - name: userid
+          in: path
+          required: true
+          description: The ID of the user
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of conversations for the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/citations/bymessage/{messageid}:
+    get:
+      tags:
+        - chat
+      summary: Get citations for a message
+      security:
+        - JWT: []
+      parameters:
+        - name: messageid
+          in: path
+          required: true
+          description: The ID of the message
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of citations for the message
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Citation"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/chat/bymessage/{messageid}/rate:
+    post:
+      tags:
+        - chat
+      summary: Rate a chat message
+      security:
+        - JWT: []
+      parameters:
+        - name: messageid
+          in: path
+          required: true
+          description: ID of the message to rate
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/rating"
+      responses:
+        "200":
+          description: Message rated successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/onboarding:
+    get:
+      tags:
+        - onboarding
+      summary: Check onboarding status
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Onboarding status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agreed:
+                    type: boolean
+                  watched:
+                    type: boolean
+                  url:
+                    type: string
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/onboarding/agree:
+    post:
+      tags:
+        - onboarding
+      summary: Agree to onboarding terms
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Onboarding terms agreed successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/onboarding/ack:
+    post:
+      tags:
+        - onboarding
+      summary: Acknowledge watching onboarding video
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Onboarding video acknowledged successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/onboarding/reset/byid/{userid}:
+    post:
+      tags:
+        - onboarding
+      summary: Reset onboarding status by user ID
+      security:
+        - JWT: []
+      parameters:
+        - name: userid
+          in: path
+          required: true
+          description: ID of the user to reset
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User onboarding status reset successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/conversations/byid/{convID}:
+    get:
+      tags:
+        - conversations
+      summary: Get conversation by ID
+      security:
+        - JWT: []
+      parameters:
+        - name: convID
+          in: path
+          required: true
+          description: ID of the conversation to retrieve
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Conversation retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/conversations/{convID}/removeusers:
+    patch:
+      tags:
+        - conversations
+      summary: Remove users from a conversation
+      security:
+        - JWT: []
+      parameters:
+        - name: convID
+          in: path
+          required: true
+          description: ID of the conversation to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFIDs"
+      responses:
+        "200":
+          description: Users removed from conversation successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/conversations/{convID}/addusers:
+    patch:
+      tags:
+        - conversations
+      summary: Add users to a conversation
+      security:
+        - JWT: []
+      parameters:
+        - name: convID
+          in: path
+          required: true
+          description: ID of the conversation to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFIDs"
+      responses:
+        "200":
+          description: Users added to conversation successfully
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/stats/chat:
+    get:
+      tags:
+        - stats
+      summary: Get chat statistics
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Chat statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatStats"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/stats/uptime:
+    get:
+      tags:
+        - stats
+      summary: Get uptime statistics
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Uptime statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UptimeStats"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/stats/quota:
+    get:
+      tags:
+        - stats
+      summary: Get quota statistics
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Quota statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaStats"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/stats/docs:
+    get:
+      tags:
+        - stats
+      summary: Get document statistics
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Document statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocStats"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/crosspart/byid/{crossID}/full:
+    get:
+      tags:
+        - crosspart
+      summary: Get full crosspart details by ID
+      security:
+        - JWT: []
+      parameters:
+        - name: crossID
+          in: path
+          required: true
+          description: ID of the crosspart to retrieve
+          schema:
+            type: string
+      description: Get full details of the crosspart including associated documents
+      responses:
+        "200":
+          description: Full crosspart details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullCross"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/crosspart/byid/{crossID}:
+    get:
+      tags:
+        - crosspart
+      summary: Get crosspart comparison by ID
+      security:
+        - JWT: []
+      parameters:
+        - name: crossID
+          in: path
+          required: true
+          description: ID of the crosspart to retrieve
+          schema:
+            type: string
+      description: Get crosspart comparison details
+      responses:
+        "200":
+          description: Crosspart comparison retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cross"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/crosspart:
+    post:
+      tags:
+        - crosspart
+      summary: Create a crosspart comparison
+      security:
+        - JWT: []
+      description: Create a new crosspart comparison
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrossList"
+      responses:
+        "200":
+          description: Crosspart comparison created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/rfq/create/withparts:
+    post:
+      tags:
+        - rfq
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      summary: Create a new RFQ with parts
+      description: Create a new RFQ including parts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RFQEntryWithParts"
+      responses:
+        200:
+          description: RFQ created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RFQEntry"
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/rfq/create:
+    post:
+      tags:
+        - rfq
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      summary: Create a new RFQ
+      description: Create a new RFQ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RFQEntry"
+      responses:
+        200:
+          description: RFQ created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RFQEntry"
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/rfq/mine/list:
+    get:
+      tags:
+        - rfq
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      summary: Get user's RFQ list
+      description: Retrieve a list of RFQs created by the user
+      responses:
+        200:
+          description: User's RFQ list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RFQEntryList"
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/rfq/details/byid/{rfq_id}/update:
+    post:
+      tags:
+        - rfq
+      parameters:
+        - name: rfq_id
+          in: path
+          required: true
+          description: ID of the RFQ to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RFQTableRow"
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      description: Update RFQ details
+      responses:
+        200:
+          description: RFQ updated successfully
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/rfq/details/byid/{rfq_id}:
+    get:
+      tags:
+        - rfq
+      parameters:
+        - name: rfq_id
+          in: path
+          required: true
+          description: ID of the RFQ to retrieve
+          schema:
+            type: string
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      description: Retrieve full or limited RFQ details based on authentication
+      responses:
+        200:
+          description: RFQ details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RFQ"
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/rfq/return/byid/{rfq_id}:
+    post:
+      tags:
+        - rfq
+      parameters:
+        - name: rfq_id
+          in: path
+          required: true
+          description: ID of the RFQ to return
+          schema:
+            type: string
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      summary: Return RFQ
+      responses:
+        200:
+          description: RFQ returned successfully
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/rfq/publish/byid/{rfq_id}:
+    post:
+      tags:
+        - rfq
+      parameters:
+        - name: rfq_id
+          in: path
+          required: true
+          description: ID of the RFQ to publish
+          schema:
+            type: string
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      summary: Publish RFQ
+      responses:
+        200:
+          description: RFQ published successfully
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/rfq/import/byid/{rfq_id}:
+    post:
+      tags:
+        - rfq
+      parameters:
+        - name: rfq_id
+          in: path
+          required: true
+          description: ID of the RFQ to import
+          schema:
+            type: string
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      summary: Import RFQ data
+      description: Upload an Excel file to update RFQ data
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The Excel file to upload
+      responses:
+        200:
+          description: RFQ data imported successfully
+        400:
+          description: Bad request
+        415:
+          description: Unsupported media type
+        500:
+          description: Internal server error
+  /api/rfq/export/byid/{rfq_id}:
+    get:
+      tags:
+        - rfq
+      parameters:
+        - name: rfq_id
+          in: path
+          required: true
+          description: ID of the RFQ to export
+          schema:
+            type: string
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      summary: Export RFQ data
+      description: Download an Excel report of the RFQ data
+      responses:
+        200:
+          description: RFQ data exported successfully
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/market/inventory/byuploader/{uploader_id}:
+    get:
+      tags:
+        - market
+      summary: Get inventory by uploader ID
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      description: Retrieve inventory items uploaded by a specific user
+      parameters:
+        - name: uploader_id
+          in: path
+          required: true
+          description: ID of the uploader to filter on
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Inventory items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Part"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/market/inventory/bulk:
+    post:
+      tags:
+        - market
+      summary: Bulk update inventory
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartIDs"
+      description: Bulk update inventory items using a list of part IDs.
+      responses:
+        "200":
+          description: Inventory updated successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Part"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/market/inventory/import:
+    post:
+      tags:
+        - market
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      summary: Import inventory data
+      description: Upload an Excel file to import inventory data.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The Excel file to upload.
+      responses:
+        200:
+          description: Inventory data imported successfully.
+        400:
+          description: Bad request
+        415:
+          description: Unsupported media type
+        500:
+          description: Internal server error
+  /api/market/inventory/export:
+    get:
+      tags:
+        - market
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+        - MagicToken: []
+      summary: Export inventory data
+      description: Download an Excel report of the inventory data.
+      responses:
+        200:
+          description: Inventory data exported successfully.
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /api/market/inventory:
+    get:
+      tags:
+        - market
+      summary: Search inventory
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: true
+          description: Search term for inventory items
+          schema:
+            type: string
+      description: Search for inventory items based on a search term.
+      responses:
+        "200":
+          description: Inventory items retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Part"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/conversations:
+    post:
+      tags:
+        - conversations
+      summary: Create a conversation
+      security:
+        - JWT: []
+      description: Create a new conversation with a list of PDF IDs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFIDs"
+      responses:
+        "200":
+          description: Conversation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+  /api/search/search:
+    get:
+      tags:
+        - WebSearch
+      summary: Search Web For Parts
+      description: Search Web For Parts.
+      parameters:
+        - name: user_query
+          in: query
+          required: true
+          description: Query string to search.
+          schema:
+            type: string
+        - name: offset
+          in: query
+          required: false
+          description: Starting offset for paginated results.
+          schema:
+            type: integer
+        - name: count
+          in: query
+          required: false
+          description: Limit of results to return.
+          schema:
+            type: integer
+      security:
+        - JWT: []
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFIDs"
+      responses:
+        "401":
+          description: Unauthorized
+        "400":
+          description: Invalid or missing user_query parameter.
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"
+        "200":
+          description: Document processing status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/search/conversations:
+    post:
+      tags:
+        - WebSearch
+      summary: Creates the conversation for the selected search documents
+      security:
+        - JWT: []
+      description: Creates the conversation for the selected search documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDFIDs"
+      responses:
+        "200":
+          description: Conversation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"       
+  /api/search/conversations/{conversationID}:
+    get:
+      tags:
+        - WebSearch
+      summary: Get Serach related conversation by an ID
+      security:
+        - JWT: []
+      parameters:
+        - name: conversationID
+          in: path
+          required: true
+          description: ID of the conversation to retrieve
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Conversation retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad request
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500Error"      
+  /api/share-document:
+      post:
+        summary: Send email with attachment
+        description: Sends an email with an optional attachment and message
+        tags:
+          - Notifications
+        requestBody:
+          required: true
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    format: email
+                    description: Recipient's email address
+                  message:
+                    type: string
+                    description: Message body of the email
+                  rfqId:
+                    type: string
+                    description: Optional RFQ ID to generate Excel attachment
+                  attachment:
+                    type: string
+                    format: binary
+                    description: Optional file attachment (if rfqId is not provided)
+                required:
+                  - email
+        security:
+          - JWT: []
+          - ServerKeyAuth: []
+        responses:
+          '200':
+            description: Email sent successfully
+          "401":
+            description: Unauthorized
+          "400":
+            description: Bad request
+          "500":
+            description: Server error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/500Error"
+components:
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+    ServerKeyAuth:
+      type: apiKey
+      in: header
+      name: V-API-KEY
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+    MagicToken:
+      type: apiKey
+      in: header
+      name: MAGIC-TOKEN
+  schemas:
+    SearchResult:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the search result.
+        url:
+          type: string
+          description: The URL of the search result.
+        uuid:
+          type: string
+          description: The unique identifier for the search result.
+        s3_key:
+          type: string
+          description: The S3 key for the search result.
+        signed_url:
+          type: string
+          description: The presigned URL for accessing the search result.
+    Response:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+          description: A list of search results.
+    NewReport:
+      type: object
+      required:
+        - name
+        - id
+      properties:
+        id:
+          type: string
+        updated:
+          type: string
+        type:
+          type: string
+        creator:
+          type: string
+        customer:
+          type: string
+        name:
+          type: string
+        sources:
+          type: string
+    Conversation:
+      type: object
+      required:
+        - name
+        - id
+        - active
+        - isSearchType
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        creation:
+          type: string
+        modified:
+          type: string
+        groupID:
+          type: string
+        libraryID:
+          type: string
+        startedAt:
+          type: datetime
+        modifiedAt:
+          type: datetime
+        active:
+          type: boolean
+        isSearchType:
+          type: boolean                    
+    Message:
+      type: object
+      required:
+        - userID
+        - conversationID
+        - text
+        - askAI
+      properties:
+        userID:
+          type: string
+        conversationID:
+          type: string
+        text:
+          type: string
+        category:
+          type: string
+        askAI:
+          type: boolean
+    MessageResp:
+      type: object
+      properties:
+        id:
+          type: string
+        userID:
+          type: string
+        conversationID:
+          type: string
+        text:
+          type: string
+        timestamp:
+          type: string
+        isUser:
+          type: boolean
+        rating:
+          type: number
+
+    UserAuthReq:
+      type: object
+      required:
+        - email
+        - password
+        - totp
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        oauth_valid:
+          type: boolean
+          example: false
+        totp:
+          type: string
+          example: "123234"
+    TreeDecision:
+      type: object
+      required:
+        - type
+        - source
+        - comment
+      properties:
+        id:
+          type: string
+        tree_id:
+          type: string
+        type:
+          type: string
+        source:
+          type: string
+        comment:
+          type: string
+        timestamp:
+          type: string
+    TreeDecisionList:
+      type: array
+      items:
+        $ref: "#/components/schemas/TreeDecision"
+    UserTOTPReq:
+      type: object
+      required:
+        - email
+        - new
+      properties:
+        email:
+          type: string
+        new:
+          type: boolean
+    UserAuthResp:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          type: object
+          properties:
+            username:
+              type: string
+            jwt:
+              type: string
+            email:
+              type: string
+            id:
+              type: string
+            avatar:
+              type: string
+
+    User:
+      type: object
+      required:
+        - email
+        - id
+        - avatar
+        - username
+        - jwt
+        - organization
+      properties:
+        apiKey:
+          type: string
+        apiKeyEnabled:
+          type: boolean
+        email:
+          type: string
+        id:
+          type: string
+        avatar:
+          type: string
+        username:
+          type: string
+        customerId:
+          type: string
+        role:
+          type: number
+        organization:
+          type: string
+        name:
+          type: string
+        joinDate:
+          type: string
+    UserWithPassword:
+      type: object
+      required:
+        - email
+        - id
+        - avatar
+        - username
+        - password
+        - jwt
+        - organization
+        - name
+      properties:
+        email:
+          type: string
+        id:
+          type: string
+        avatar:
+          type: string
+        username:
+          type: string
+        customerId:
+          type: string
+        password:
+          type: string
+        role:
+          type: number
+        organization:
+          type: string
+        name:
+          type: string
+        join_date:
+          type: string
+    OrgCreationResp:
+      type: object
+      required:
+        - orgID
+      properties:
+        orgID:
+          type: string
+    Category:
+      type: string
+
+    OrgUpdateReq:
+      type: object
+      required:
+        - name
+        - adminEmail
+      properties:
+        name:
+          type: string
+          example: My Org
+        adminEmail:
+          type: string
+          example: admin2@admin.com
+        domain:
+          type: string
+          example: admin.com
+    Document:
+      type: object
+      required:
+        - isPublic
+        - id
+        - orgID
+        - title
+        - forkSource
+        - filename
+        - artifact
+        - uploader
+        - poc
+        - hash
+        - resourceId
+        - createdAt
+        - category
+        - reflink
+      properties:
+        isPublic:
+          type: boolean
+        id:
+          type: string
+        orgID:
+          type: string
+        title:
+          type: string
+        forkSource:
+          type: string
+        filename:
+          type: string
+        artifact:
+          type: string
+        uploader:
+          type: string
+        poc:
+          type: string
+        hash:
+          type: string
+        resourceId:
+          type: string
+        createdAt:
+          type: string
+        category:
+          type: string
+        reflink:
+          type: string
+
+    PDFProcessItem:
+      type: object
+      required:
+        - isPublic
+        - pdfID
+        - category
+        - title
+      properties:
+        isPublic:
+          type: boolean
+        pdfID:
+          type: string
+        category:
+          type: string
+        title:
+          type: string
+        reflink:
+          type: string
+    ComputedOrgResp:
+      type: object
+      required:
+        - orgID
+        - adminEmail
+        - adminID
+        - orgName
+        - numUsers
+        - numDocs
+        - ispartner
+      properties:
+        ispartner:
+          type: boolean
+        adminID:
+          type: string
+        orgID:
+          type: string
+        adminEmail:
+          type: string
+        orgName:
+          type: string
+        numUsers:
+          type: number
+        numDocs:
+          type: number
+    PresignedPayload:
+      type: object
+      required:
+        - uuid
+        - url
+        - name
+      properties:
+        uuid:
+          type: string
+        url:
+          type: string
+        name:
+          type: string
+    OrgCreationReq:
+      type: object
+      required:
+        - orgName
+        - adminEmail
+      properties:
+        orgName:
+          type: string
+          example: My Company
+        adminEmail:
+          type: string
+          example: admin@admin.com
+        domain:
+          type: string
+          example: admin.com
+    Group:
+      type: object
+      required:
+        - name
+        - owner
+        - id
+      properties:
+        name:
+          type: string
+        owner:
+          type: string
+        id:
+          type: string
+    UserInviteReq:
+      type: object
+      required:
+        - email
+        - orgID
+        - _new
+      properties:
+        email:
+          type: string
+        orgID:
+          type: string
+        _new:
+          type: boolean
+    UserAuthResetResp:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: false
+    DateRange:
+      type: object
+      required:
+        - startDate
+        - endDate
+      properties:
+        startDate:
+          type: string
+        endDate:
+          type: string
+    UserGroup:
+      type: object
+      required:
+        - userId
+        - groupId
+        - role
+      properties:
+        userId:
+          type: string
+        groupId:
+          type: string
+        role:
+          type: string
+    FeatureSet:
+      type: object
+      required:
+        - libraryEnabled
+        - tablesEnabled
+        - marketEnabled
+        - promptsEnabled
+        - statsEnabled
+        - treesEnabled
+        - chatEnabled
+        - fapEnabled
+        - copEnabled
+        - pubEnabled
+      properties:
+        marketEnabled:
+          type: boolean
+        libraryEnabled:
+          type: boolean
+        tablesEnabled:
+          type: boolean
+        promptsEnabled:
+          type: boolean
+        statsEnabled:
+          type: boolean
+        treesEnabled:
+          type: boolean
+        chatEnabled:
+          type: boolean
+        fapEnabled:
+          type: boolean
+        copEnabled:
+          type: boolean
+        pubEnabled:
+          type: boolean
+    Part:
+      type: object
+      required:
+        - part_name
+        - part_number
+        - comm_cat
+        - status
+        - createdAt
+        - owner_id
+        - id
+      properties:
+        id:
+          type: string
+        part_number:
+          type: string
+        part_name:
+          type: string
+        comm_cat:
+          type: string
+        createdAt:
+          type: string
+        status:
+          type: string
+        owner_id:
+          type: string
+        supplier_name:
+          type: string
+        public:
+          type: boolean
+        datasheet_id:
+          type: string
+    PDF:
+      type: object
+      required:
+        - id
+        - filename
+        - categoryName
+        - uploaderEmail
+        - createdAt
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        categoryName:
+          type: string
+        uploaderEmail:
+          type: string
+        createdAt:
+          type: string
+    Report:
+      type: object
+      required:
+        - id
+        - categoryName
+        - title
+        - createdAt
+      properties:
+        id:
+          type: string
+        categoryName:
+          type: string
+        title:
+          type: string
+        createdAt:
+          type: string
+    TableReport:
+      type: object
+      required:
+        - ids
+      properties:
+        name:
+          type: string
+        ids:
+          type: array
+          items:
+            type: string
+        questions:
+          type: array
+          items:
+            type: string
+
+    Cross:
+      type: object
+      required:
+        - id
+        - name
+        - category
+        - reference
+        - created
+        - modifiedAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: number
+        reference:
+          type: string
+        created:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+    CrossDocSpec:
+      type: object
+      required:
+        - id
+        - pdfID
+        - question
+        - answer
+        - category
+      properties:
+        id:
+          type: string
+        pdfID:
+          type: string
+        question:
+          type: number
+        answer:
+          type: string
+        category:
+          type: number
+    FullCross:
+      type: object
+      required:
+        - id
+        - reference
+        - name
+        - category
+        - created
+        - modifiedAt
+        - specs
+        - analysis
+      properties:
+        id:
+          type: string
+        reference:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        creation:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        specs:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/CrossDocSpec"
+        analyses:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/CrossAnalysisRelation"
+    CrossAnalysisRelation:
+      type: object
+      required:
+        - crossID
+        - docStatsID
+        - referenceSpecsID
+        - category
+        - is_match
+        - match_score
+        - reason
+      properties:
+        crossID:
+          type: string
+        docStatsID:
+          type: string
+        referenceSpecsID:
+          type: string
+        category:
+          type: number
+        is_match:
+          type: boolean
+        match_score:
+          type: number
+        reason:
+          type: string
+    CrossList:
+      type: object
+      required:
+        - ids
+        - reference
+      properties:
+        name:
+          type: string
+        ids:
+          type: array
+          items:
+            type: string
+        reference:
+          type: string
+    PartIDs:
+      type: object
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+    PDFIDs:
+      type: object
+      required:
+        - ids
+      properties:
+        name:
+          type: string
+        ids:
+          type: array
+          items:
+            type: string
+    Citation:
+      type: object
+      required:
+        - pdfID
+        - chunk
+        - barcode
+        - index
+      properties:
+        bounds:
+          type: string
+        index:
+          type: number
+        pdfID:
+          type: string
+        chunk:
+          type: string
+        barcode:
+          type: string
+        pagenr:
+          type: string
+    rating:
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: string
+    ChatStats:
+      type: object
+      required:
+        - counts
+      properties:
+        counts:
+          type: object
+          properties:
+            none:
+              type: number
+            liked:
+              type: number
+            disliked:
+              type: number
+          required:
+            - none
+        helpful:
+          type: number
+    RFQTableRow:
+      type: object
+      properties:
+        uuid:
+          type: string
+        program_name:
+          type: string
+          description: "Program Name"
+        commodity_manager:
+          type: string
+          description: "Commodity Manager"
+        commodity_category:
+          type: string
+          description: "Commodity Category (IC, Passives, etc)"
+        customer_part_number:
+          type: string
+          description: "Customer Part Number"
+        cm_odm_partner_name:
+          type: string
+          description: "CM/ODM Partner Name"
+        cm_odm_partner_part_number:
+          type: string
+          description: "CM/ODM Partner Part Number"
+        cm_odm_location:
+          type: string
+          description: "CM/ODM Location"
+        supplier:
+          type: string
+          description: "Supplier"
+        supplier_representative:
+          type: string
+          description: "Supplier Representative"
+        supplier_part_number:
+          type: string
+          description: "Supplier Part Number"
+        current_qtr_price:
+          type: number
+          description: "Current QTR Price"
+        current_qtr_lt:
+          type: number
+          description: "Current QTR LT"
+        current_qtr_volume:
+          type: number
+          description: "Current QTR Volume"
+        q1_volume:
+          type: number
+          description: "Q+1 Volume"
+        q1_price:
+          type: number
+          description: "Q+1 Price"
+        q1_moq:
+          type: number
+          description: "MoQ"
+        channel:
+          type: string
+          description: "Channel (Direct or Distribution)"
+        q1_lt:
+          type: number
+          description: "LT"
+        lt_10_percent_demand_upside:
+          type: number
+          description: "LT for 10% Demand Upside"
+        lt_30_percent_demand_upside:
+          type: number
+          description: "LT for 30% Demand Upside"
+        lt_50_percent_demand_upside:
+          type: number
+          description: "LT for 50% Demand Upside"
+        q2_volume:
+          type: number
+          description: "Q+2 Volume"
+        q2_price:
+          type: number
+          description: "Q+2 Price"
+        q2_moq:
+          type: number
+          description: "MoQ (Q+2)"
+        q2_channel:
+          type: string
+          description: "Channel (Q+2)"
+        q2_lt:
+          type: number
+          description: "LT (Q+2)"
+        q2_lt_demand_upside:
+          type: number
+          description: "LT for Demand Upside (Q+2)"
+        q3_volume:
+          type: number
+          description: "Q+3 Volume"
+        q3_price:
+          type: number
+          description: "Q+3 Price"
+        q3_moq:
+          type: number
+          description: "MoQ (Q+3)"
+        q3_channel:
+          type: string
+          description: "Channel (Q+3)"
+        q3_lt:
+          type: number
+          description: "LT (Q+3)"
+        q3_lt_demand_upside:
+          type: number
+          description: "LT for Demand Upside (Q+3)"
+        q4_volume:
+          type: number
+          description: "Q+4 Volume"
+        q4_price:
+          type: number
+          description: "Price (Q+4)"
+        q4_moq:
+          type: number
+          description: "MoQ (Q+4)"
+        q4_channel:
+          type: string
+          description: "Channel (Q+4)"
+        q4_lt:
+          type: number
+          description: "LT (Q+4)"
+        q4_lt_demand_upside:
+          type: number
+          description: "LT for Demand Upside (Q+4)"
+        q5_volume:
+          type: number
+          description: "Q+5 Volume"
+        q5_price:
+          type: number
+          description: "Price (Q+5)"
+        q5_moq:
+          type: number
+          description: "MoQ (Q+5)"
+        q5_channel:
+          type: string
+          description: "Channel (Q+5)"
+        q5_lt:
+          type: number
+          description: "LT (Q+5)"
+        q5_lt_demand_upside:
+          type: number
+          description: "LT for Demand Upside (Q+5)"
+        q6_volume:
+          type: number
+          description: "Q+6 Volume"
+        q6_price:
+          type: number
+          description: "Price (Q+6)"
+        q6_moq:
+          type: number
+          description: "MoQ (Q+6)"
+        q6_channel:
+          type: string
+          description: "Channel (Q+6)"
+        q6_lt:
+          type: number
+          description: "LT (Q+6)"
+        q6_lt_demand_upside:
+          type: number
+          description: "LT for Demand Upside (Q+6)"
+        inco_terms:
+          type: string
+          description: "INCO Terms"
+        fe_location:
+          type: string
+          description: "FE Location"
+        be_location:
+          type: string
+          description: "BE Location"
+        ship_from_location:
+          type: string
+          description: "Ship From Location"
+        customer_comments:
+          type: string
+          description: "Customer Comments"
+        supplier_comments:
+          type: string
+          description: "Supplier Comments"
+    RFQ:
+      type: object
+      properties:
+        id:
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/RFQTableRow"
+        program_name:
+          type: string
+        owner_id:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        published:
+          type: boolean
+    DocStats:
+      type: object
+      required:
+        - counts
+      properties:
+        counts:
+          type: array
+          items:
+            properties:
+              user:
+                type: string
+              count:
+                type: number
+    QuotaStats:
+      type: object
+      required:
+        - sent
+        - quota
+      properties:
+        sent:
+          type: number
+        quota:
+          type: number
+    UptimeStats:
+      type: object
+      required:
+        - days
+        - percentage
+      properties:
+        percentage:
+          type: number
+        days:
+          type: array
+          items:
+            properties:
+              variant:
+                type: string
+              count:
+                type: number
+    RFQEntryWithParts:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        updated_at:
+          type: string
+        user_id:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        partIds:
+          type: array
+          items:
+            type: string
+    RFQEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        updated_at:
+          type: string
+        user_id:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+    RFQEntryList:
+      type: array
+      items:
+        $ref: "#/components/schemas/RFQEntry"
+    Tree:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        updated_at:
+          type: string
+        owner_id:
+          type: string
+        org_id:
+          type: string
+    TreeList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Tree"
+    ReportList:
+      type: array
+      items:
+        type: object
+        required:
+          - id
+          - type
+        properties:
+          type:
+            type: string
+          id:
+            type: string
+          name:
+            type: string
+          updated:
+            type: string
+    TableData:
+      type: object
+      required:
+        - id
+        - sources
+        - name
+        - questions
+        - updated_at
+        - creator
+        - customer
+      properties:
+        id:
+          type: string
+        sources:
+          type: string
+        name:
+          type: string
+        questions:
+          type: string
+        updated_at:
+          type: string
+        creator:
+          type: string
+        customer:
+          type: string
+    AnswerList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Answer"
+    Answer:
+      type: object
+      required:
+        - id
+        - question
+        - answer
+        - source
+      properties:
+        id:
+          type: number
+        question:
+          type: string
+        answer:
+          type: string
+        source:
+          type: string
+    500Error:
+      type: object
+      properties:
+        message:
+          type: string
